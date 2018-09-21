@@ -1,0 +1,53 @@
+---
+title: "Istruzioni Shiny App per formare gruppi omogenei con lo ZAV"
+author: "Umberto Vesco"
+date: "17/7/2018"
+output: html_document
+---
+## Funzionamento
+L'applicazione divide gli alveari in n gruppi omogenei dividendo in quantili e assegnando con una procedura random gli alveari di ciascun quantile ai due gruppi.  
+Nella prima fase vengono ordinati gli alveari per valore di zav. La posizione agli alveari con lo stesso valore di zav viene assegnata in modo pseudocasuale in base al seme impostato dall'utente.  
+Nela seconda fase vengono eseguite delle iterazioni (100-5000 impostabili dall'utente) con seme che varia in modo costante a partire dal seme impostato per assegnare ciascun alveare del quantile (della dimensione n pari al numero di tesi) in ordine casuale alle n tesi. Dalla matrice delle combinazioni le 25 che garantiscono un minor affiancamento nella stessa banchetta di alveari appartenenti a tesi diverse sono selezionabili per la valutazione dell'utente.  
+
+## Dati
+
+### File di Input (xls)
+La deriva viene tenuta in conto supponendo che gli alveari siano disposti in una o più file (gruppi) e in banchette lineari.  
+Gli alveari devono essere disposti nel file nell'ordine della fila, indicando per ciascuno l'eventuale appartenenza a banchette (idBanchetta) e file (idGruppo) separate.
+
+Nella colonna zav devono essere inseriti gli acari caduti (non la percentuale.)
+
+### Numero di api
+Selezionare il numero di api campionate per fare lo zav.
+
+## Selezione
+E' necessario il passaggio da questo tab per selezionare gli alveari da utilizzare e da eliminare.
+
+### Outliers
+E' possibile osservare nell'apposito sottotab il loro effetto ed eventualmente escluderli dai gruppi.
+
+### Soglia minima di infestazione
+E' possibile eliminare tutti gli alveari al di sotto di una certa infestazione (in percentuale, massimo 2%).
+
+### Escludi manualmente
+E' possibile indicare gli alveari da escludere manualmente.
+
+## Analisi
+E' necessario passare dal tab selezione per attivare il dataset da cui estrarre i gruppi. Gli eventuali errori iniziali dipendono dalla manca elaborazione dell'analisi: scompaiono schiacciando il tasto "Calcola".
+
+### Numero di tesi
+Impostare il numero di trattamenti da eseguire (numero di gruppi omogenei): il numero di alveari selezionati deve essere un multiplo del numero di gruppi (es: 30 alveari, 3 gruppi: OK; 30 alveari, 4 gruppi NO).  
+
+### Numero di iterazioni
+Numero di permutazioni casuali nell'assegnazione di alveari nella stessa classe di infestazione ai due gruppi. Maggiori sono migliori sono le probabilità di trovare delle buone soluzioni dal punto di vista della varroa.
+Le combinazioni estratte più volte e vengono rese disponibili alla voce "Altre combinazioni con stessa distribuzione (deriva crescente)" le migliori dal punto di vista della deriva
+
+### Seme del generatore di numeri casuali
+E' il seme di partenza per la generazione dei numeri casuali. Per variare la distribuzione è necessario variare il parametro. Si consiglia di variare diverse volte il seme per provare più combinazioni.
+
+### Indice di deriva
+E' la frazione di accostamenti di alveari di tesi diversa sulla stessa banchetta sul totale degli accostamenti. Il programma propone le migliori 25 per ciascuna distribuzione originata da un diverso seme.
+
+### Download
+Il tasto permette di scaricare il file.xls con la combinazione selezionata.
+
