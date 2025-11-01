@@ -1,4 +1,42 @@
-.Rproj.user
+# File e cartelle temporanei di R
 .Rhistory
 .RData
 .Ruserdata
+.Rproj.user/
+.Rprofile
+
+# Dati locali e cache
+.DS_Store
+*.log
+*.tmp
+*.bak
+*.swp
+*.Rproj
+
+# Output e build automatici
+*/_site/
+*/_book/
+*/_freeze/
+*/_publish/
+*/_files/
+*/_cache/
+*/docs/
+*/output/
+*.html
+*.pdf
+
+# File di deploy rsconnect
+rsconnect/
+*.dcf
+
+# Credenziali e chiavi
+*.key
+*.pem
+*.crt
+*.env
+.env
+.env.*
+
+# Backup vari
+*.old
+*.orig
