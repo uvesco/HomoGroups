@@ -27,7 +27,7 @@ ui <- shinyUI(navbarPage("Formazione dei gruppi",
                                                   selected = numApiPasso[1, 1]),
                                       br(),
                                       "E' possibile scaricare un file di prova da utilizzare come template qui: ",
-                                      tags$a(href="http://uvesco.altervista.org/unaapi/dati_prova.xls", "dati_prova.xls")
+                                      tags$a(href="dati_prova.xls", "dati_prova.xls")
                                     ),
                                     mainPanel(
                                       tabsetPanel(
