@@ -2,7 +2,7 @@
 
 library(shiny)
 library(readxl)
-library(WriteXLS)
+library(writexl)
 library(ggplot2)
 
 # funzioni ----------------------------------------------------------------
@@ -528,7 +528,7 @@ server <- function(input, output) {
         paste("gruppi_auto.xls", sep = "")
       },
       content = function(file) {
-        WriteXLS(alveariAnDEF()[,1:5], file, row.names = FALSE)}
+        write_xlsx(alveariAnDEF()[,1:5], file, col_names = TRUE)}
 
       
     )
