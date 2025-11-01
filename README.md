@@ -1,11 +1,12 @@
 # HomoGroups
-A Shiny app to divide a group of beehives in groups with homogeneous infestation mean and distribution to apply different acaricide treatments, trying to minimize drifting of mites between groups in neighboring hives.
+A Shiny app for dividing apiaries into groups with homogeneous mean and distribution of infestation levels, in order to apply different acaricide treatments (for research purposes) while minimizing mite drifting between neighboring hives.
 
-Infestation is preliminary estimated on adult bees by the means of sugar shaking method o alcool washing method [1,2].
+Infestation levels are preliminarily estimated on adult bees using either the sugar shake or the alcohol wash method [1,2].
 
-App is published at https://vesco.shinyapps.io/gruppiZav/
+The app is available at: <https://vesco.shinyapps.io/gruppiZav/>
 
-The work was originally funded by Unaapi (Unione Nazionale Associazioni di Apicoltori - ITALY)
+This work was originally funded by [UNAAPI](www.unaapi.it).
+
 
 ## References
 1. Lee, K. V.; Reuter, G. S.; Spivak, M. Standardized Sampling Plan to Detect Varroa Density in Colonies and Apiaries. American Bee Journal 2010, 150, 1151–1155.
