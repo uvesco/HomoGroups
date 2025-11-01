@@ -1,7 +1,7 @@
 # HomoGroups
 A Shiny app to divide a group of beehives in groups with homogeneous infestation mean and distribution to apply different acaricide treatments, trying to minimize drifting of mites between groups in neighboring hives.
 
-Infestation is preliminary estimated by the means of sugar shaking method [1,2].
+Infestation is preliminary estimated on adult bees by the means of sugar shaking method of alcool washing method [1,2].
 
 App is published for test at https://vesco.shinyapps.io/gruppiZav/
 
