@@ -3,7 +3,9 @@ A Shiny app to divide a group of beehives in groups with homogeneous infestation
 
 Infestation is preliminary estimated on adult bees by the means of sugar shaking method o alcool washing method [1,2].
 
-App is published for test at https://vesco.shinyapps.io/gruppiZav/
+App is published at https://vesco.shinyapps.io/gruppiZav/
+
+The work was originally funded by Unaapi (Unione Nazionale Associazioni di Apicoltori - ITALY)
 
 ## References
 1. Lee, K. V.; Reuter, G. S.; Spivak, M. Standardized Sampling Plan to Detect Varroa Density in Colonies and Apiaries. American Bee Journal 2010, 150, 1151–1155.
