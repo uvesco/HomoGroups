@@ -185,6 +185,9 @@ server <- function(input, output) {
   # logical, is manually excluded
   isManExcluded <- reactive({
     req(alveari())
+    if(is.null(input$manualExcluded)) {
+      return(rep(FALSE, nrow(alveari())))
+    }
     alveari()$idAlveare %in% input$manualExcluded
   })
   
@@ -194,7 +197,9 @@ server <- function(input, output) {
     req(alveari())
     if(input$delOutliers){
       alveari()[!isOutlier() & !isSottosoglia() & !isManExcluded(), ]
-    }else{alveari()[!isSottosoglia(), ]}
+    }else{
+      alveari()[!isSottosoglia() & !isManExcluded(), ]
+    }
   })
   # tutti gli alveari, annullati i non selezionati
     alveariAn <- reactive({
