@@ -76,7 +76,7 @@ ui <- shinyUI(navbarPage("Formazione dei gruppi",
                                     )
                                   )
                          ),
-                         tabPanel("Auto",
+                         tabPanel("Simulazione",
                                   sidebarLayout(
                                     sidebarPanel(
                                       #"Alveari selezionati:", textOutput("nAlvPo", inline = T),
@@ -118,32 +118,131 @@ ui <- shinyUI(navbarPage("Formazione dei gruppi",
                                       #textOutput("TEMP"),
 
                                     )
-                                  ))#,
-                         # tabPanel("Manuale",
-                         #          sidebarLayout(
-                         #            sidebarPanel(
-                         #              uiOutput("radioGrid")
-                         # 
-                         #            ),
-                         #            mainPanel(
-                         #              tabsetPanel(
-                         #                tabPanel("Grafici"
-                         # 
-                         #                         
-                         #                ),
-                         #                tabPanel("Tabella"
-                         # 
-                         #                         
-                         #                )
-                         #              )
-                         #              
-                         #              
-                         #              
-                         #              #textOutput("TEMP"),
-                         #              
-                         #            )
-                         #          ))
-                         
+                                  )),
+                         tabPanel("Help",
+                                  fluidRow(
+                                    column(12,
+                                           h2("Guida all'utilizzo dell'applicazione"),
+                                           
+                                           h3("1. Funzionamento generale"),
+                                           p("L'applicazione divide gli alveari in n gruppi omogenei per livello di infestazione da varroa, 
+                                             minimizzando la deriva (passaggio di api e varroa) tra gruppi diversi posizionati su banchette adiacenti."),
+                                           p("Il processo si articola in tre fasi: caricamento dati, selezione alveari e simulazione automatica 
+                                             per la creazione dei gruppi."),
+                                           
+                                           h3("2. Tab 'Dati' - Caricamento e visualizzazione"),
+                                           h4("File di Input (formato .xls)"),
+                                           tags$ul(
+                                             tags$li("Gli alveari devono essere disposti nel file nell'ordine della loro posizione fisica"),
+                                             tags$li("Colonne richieste: idAlveare, idBanchetta (gruppo di alveari sulla stessa banchetta), 
+                                                     idGruppo (fila di banchette), zav (numero assoluto di acari caduti, non percentuale)"),
+                                             tags$li("La deriva viene calcolata considerando gli alveari disposti in una o più file e in banchette lineari"),
+                                             tags$li("È disponibile un file di prova come template")
+                                           ),
+                                           h4("Numero di Api"),
+                                           p("Selezionare il numero di api campionate durante il metodo dello zucchero a velo o lavaggio alcolico 
+                                             (300, 450 o 900). Questo valore è necessario per calcolare la percentuale di infestazione."),
+                                           h4("Visualizzazioni"),
+                                           tags$ul(
+                                             tags$li(strong("Tabella:"), " mostra tutti i dati caricati"),
+                                             tags$li(strong("Sommario:"), " statistiche descrittive (numero alveari, media, mediana)"),
+                                             tags$li(strong("Distribuzione:"), " boxplot e barplot dell'infestazione, con linea di riferimento al 5%")
+                                           ),
+                                           
+                                           h3("3. Tab 'Selezione' - Filtri e criteri di esclusione"),
+                                           p(strong("IMPORTANTE:"), " È necessario visitare questo tab prima di procedere alla simulazione 
+                                             per attivare il dataset di lavoro."),
+                                           h4("Escludi gli outliers"),
+                                           p("Permette di escludere automaticamente gli alveari con valori di infestazione anomali (outliers statistici). 
+                                             Il subtab 'Outliers' mostra:"),
+                                           tags$ul(
+                                             tags$li("Identificazione degli outliers"),
+                                             tags$li("Proporzione e media degli outliers"),
+                                             tags$li("Confronto tra distribuzioni con e senza outliers"),
+                                             tags$li("Visualizzazioni comparative (boxplot e istogrammi)")
+                                           ),
+                                           h4("Soglia minima di infestazione"),
+                                           p("Permette di escludere gli alveari con infestazione inferiore a una soglia (da 0 a 2%, regolabile). 
+                                             Il subtab 'Soglia minima' mostra graficamente gli alveari selezionati."),
+                                           h4("Escludi manualmente"),
+                                           p("Permette di selezionare specifici alveari da escludere dall'analisi."),
+                                           p("Il numero di alveari selezionati viene visualizzato nella barra laterale."),
+                                           
+                                           h3("4. Tab 'Simulazione' - Creazione automatica dei gruppi"),
+                                           h4("Logica dell'algoritmo"),
+                                           p("L'algoritmo opera in due fasi:"),
+                                           tags$ol(
+                                             tags$li(strong("Ordinamento:"), " gli alveari vengono ordinati per valore di infestazione. 
+                                                     Per alveari con lo stesso valore, la posizione viene assegnata in modo pseudocasuale 
+                                                     basato sul seme impostato."),
+                                             tags$li(strong("Iterazioni:"), " vengono eseguite diverse iterazioni (100-5000 impostabili) 
+                                                     per assegnare casualmente gli alveari di ciascun quantile alle n tesi. 
+                                                     Le 25 migliori combinazioni che minimizzano l'affiancamento di alveari di tesi diverse 
+                                                     sulla stessa banchetta vengono rese disponibili per la selezione.")
+                                           ),
+                                           h4("Parametri"),
+                                           tags$ul(
+                                             tags$li(strong("Numero di tesi:"), " numero di gruppi omogenei da creare (= numero di trattamenti). 
+                                                     Il numero di alveari selezionati DEVE essere un multiplo del numero di tesi 
+                                                     (es: 30 alveari con 3 gruppi OK, 30 alveari con 4 gruppi NO)."),
+                                             tags$li(strong("Numero di iterazioni:"), " numero di permutazioni casuali (100-5000). 
+                                                     Più iterazioni aumentano la probabilità di trovare soluzioni ottimali."),
+                                             tags$li(strong("Seme del generatore:"), " seme di partenza per la generazione dei numeri casuali. 
+                                                     Variare il seme per ottenere distribuzioni diverse e minimizzare l'indice di deriva.")
+                                           ),
+                                           h4("Indice di deriva"),
+                                           p("L'indice di deriva rappresenta la frazione di accostamenti di alveari di tesi diverse 
+                                             sulla stessa banchetta rispetto al totale degli accostamenti possibili. 
+                                             Un indice più basso indica una migliore separazione fisica tra i gruppi, 
+                                             riducendo il rischio di contaminazione tra trattamenti diversi."),
+                                           p("Il programma propone le 25 migliori combinazioni per ciascuna distribuzione, 
+                                             ordinate per indice di deriva crescente."),
+                                           h4("Test del Chi quadrato"),
+                                           p("Viene eseguito un test del Chi quadrato di Pearson sui dati raggruppati in 5 classi 
+                                             (quintili di infestazione) per verificare l'omogeneità della distribuzione tra i gruppi. 
+                                             Un p-value alto (> 0.05) indica che i gruppi hanno distribuzioni simili di infestazione."),
+                                           h4("Visualizzazioni"),
+                                           tags$ul(
+                                             tags$li(strong("Grafici:"), " barplot colorato per tesi e grafico di densità per visualizzare 
+                                                     la distribuzione dell'infestazione in ciascun gruppo"),
+                                             tags$li(strong("Tabella:"), " mostra i risultati finali con l'assegnazione di ciascun alveare al gruppo (colonna grTesi)")
+                                           ),
+                                           h4("Download"),
+                                           p("Il pulsante Download permette di scaricare un file .xls con la soluzione selezionata, 
+                                             inclusa la colonna grTesi che indica l'appartenenza al gruppo."),
+                                           
+                                           h3("5. Procedura consigliata"),
+                                           tags$ol(
+                                             tags$li("Caricare il file .xls dei dati nel tab 'Dati' e verificare le statistiche"),
+                                             tags$li("Selezionare il numero corretto di api campionate"),
+                                             tags$li("Visitare il tab 'Selezione' ed eventualmente escludere outliers o impostare una soglia minima"),
+                                             tags$li("Verificare che il numero di alveari selezionati sia compatibile con il numero di tesi desiderato"),
+                                             tags$li("Nel tab 'Simulazione', impostare numero di tesi e iterazioni, poi cliccare 'Calcola'"),
+                                             tags$li("Provare diversi valori del seme per minimizzare l'indice di deriva"),
+                                             tags$li("Selezionare la combinazione migliore tra le 25 proposte"),
+                                             tags$li("Verificare i grafici e il test Chi quadrato"),
+                                             tags$li("Scaricare il file con i gruppi creati")
+                                           ),
+                                           
+                                           h3("6. Note e limitazioni"),
+                                           tags$ul(
+                                             tags$li("È necessario visitare il tab 'Selezione' prima di calcolare i gruppi nel tab 'Simulazione'"),
+                                             tags$li("L'algoritmo di valutazione della deriva non tiene conto degli spazi vuoti creati dagli alveari esclusi"),
+                                             tags$li("La linea rossa di riferimento nei grafici indica il 5% di infestazione, 
+                                                     valore critico per valutare la necessità di trattamento")
+                                           ),
+                                           
+                                           br(),
+                                           hr(),
+                                           h4("Riferimenti"),
+                                           p("Per maggiori dettagli metodologici sulla stima dell'infestazione:"),
+                                           tags$ul(
+                                             tags$li("Lee et al. (2010) American Bee Journal 150:1151-1155"),
+                                             tags$li("Lee et al. (2010) Journal of Economic Entomology 103:1039-1050")
+                                           )
+                                    )
+                                  )
+                         )
 ))
   
   
@@ -336,16 +435,16 @@ server <- function(input, output) {
   ## SUBTAB Soglia minima
   # barplot selezione
   output$selBar <- renderPlot({
-    req(alveari())
+    req(alveariAn())
     distprec <- 0.15
-    for(i in 2:dim(alveari())[1]){
-      distprec[i] <- (alveari()$idBanchetta[i-1] != alveari()$idBanchetta[i]) + 
-        (alveari()$idGruppo[i-1] != alveari()$idGruppo[i])*2 + 0.15
+    for(i in 2:dim(alveariAn())[1]){
+      distprec[i] <- (alveariAn()$idBanchetta[i-1] != alveariAn()$idBanchetta[i]) + 
+        (alveariAn()$idGruppo[i-1] != alveariAn()$idGruppo[i])*2 + 0.15
     }
     req(tzavAn(), tzav(), input$sogliaMin)
     barplot(tzavAn(), space = distprec, col = "khaki1",
           main = "Infestazione\n(alveari selezionati, raggruppati per banchetta)", 
-          ylab = "acari / 100 api",           names.arg = alveari()$idAlveare, cex.names = 0.9, 
+          ylab = "acari / 100 api",           names.arg = alveariAn()$idAlveare, cex.names = 0.9, 
           las = 2, ylim = c(0, max(tzav()))); abline(h=5, col = "red", lty=2); abline(h = input$sogliaMin)
   })
   
