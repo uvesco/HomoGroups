@@ -167,61 +167,80 @@ server <- function(input, output) {
   })
   ### Altre elaborazioni ------------------------------
   # zav per 100 api
-  tzav <- reactive({(alveari()$zav / as.integer(input$numApi))*100})
+  tzav <- reactive({
+    req(alveari())
+    (alveari()$zav / as.integer(input$numApi))*100
+  })
   # logical, is outlier
   isOutlier <- reactive({
+    req(alveari())
     alveari()$zav %in% boxplot.stats(alveari()$zav)$out
   })
   # logical, is sotto soglia
   isSottosoglia <- reactive({
+    req(tzav(), input$sogliaMin)
     tzav() < input$sogliaMin
-    
+
   })
   # logical, is manually excluded
   isManExcluded <- reactive({
+    req(alveari())
     alveari()$idAlveare %in% input$manualExcluded
   })
   
   # alveari selezionati in base a parametri di outlier sì/no e slider soglia
  
     alveariPo <- reactive({
+    req(alveari())
     if(input$delOutliers){
       alveari()[!isOutlier() & !isSottosoglia() & !isManExcluded(), ]
     }else{alveari()[!isSottosoglia(), ]}
   })
   # tutti gli alveari, annullati i non selezionati
     alveariAn <- reactive({
+      req(alveari())
       alveariAn <- alveari()
       alveariAn$zav[!(alveariAn$idAlveare %in% alveariPo()$idAlveare)] <- NA
       alveariAn
     })
   # tzavAn
     # zav per 100 api
-    tzavAn <- reactive({(alveariAn()$zav / as.integer(input$numApi))*100})
+    tzavAn <- reactive({
+      req(alveariAn())
+      (alveariAn()$zav / as.integer(input$numApi))*100
+    })
   
   # numero di alveari in uso è un multiplo del numero di tesi?
     output$checkTesi <- renderText(
+      {
+      req(alveariPo(), input$tesi)
       if(dim(alveariPo())[1] %% input$tesi == 0){
         paste0("OK")
       }else{
         paste0("ERRORE: il numero di alveari (", dim(alveariPo())[1],
-               ") non è multiplo del numero di gruppi (", input$tesi, 
+               ") non è multiplo del numero di gruppi (", input$tesi,
                "): aggiungere o togliere alveari.")
         #2do sarebbe bene rendere non cliccabile l'action button
         }
+      }
     )
   # simulazione delle combinazioni
     
 # TAB Dati ----------------------------------------------------------------
 
       # tabella generale da visualizzare
-  output$tabAlveari <- renderTable({alveari() })
+  output$tabAlveari <- renderTable({
+    req(alveari())
+    alveari()
+  })
   # numero di alveari
   output$numAlveari <- renderText({
+    req(alveari())
     dim(alveari())[1]
   })
   # infestazione media e range
   output$infMed <- renderText({
+    req(alveari())
     media <- arrotperc(mean(alveari()$zav, na.rm = T) / as.integer(input$numApi))
     minima <- arrotperc(min(alveari()$zav, na.rm = T) / as.integer(input$numApi))
     massima <- arrotperc(max(alveari()$zav, na.rm = T) / as.integer(input$numApi))
@@ -229,17 +248,20 @@ server <- function(input, output) {
     })
   # mediana
   output$infMedian <- renderText({
+    req(tzav())
     boxplot.stats(tzav())$stats[3]
   })
 
   # boxplot dati grezzi
   output$grBox <- renderPlot({
     #tzav <- (alveari()$zav / as.integer(input$numApi))*100
+    req(tzav())
     boxplot(tzav(), main = "Infestazione complessiva", ylab = "acari / 100 api"); abline(h=5, col = "red", lty=2)
   })
   # barplot dati grezzi
   distpreci <- reactive({ # distanze richiamate in tutti i barplot successivi
-  distprec <- 0.15 
+  req(alveari())
+  distprec <- 0.15
   for(i in 2:dim(alveari())[1]){
     distprec[i] <- (alveari()$idBanchetta[i-1] != alveari()$idBanchetta[i]) + 
       (alveari()$idGruppo[i-1] != alveari()$idGruppo[i])*2 + 0.15
@@ -247,7 +269,8 @@ server <- function(input, output) {
   distprec
   })
   output$grBar <- renderPlot({
-    barplot(tzav(), space = distpreci(), col = as.factor(alveari()$idGruppo), 
+    req(tzav(), distpreci())
+    barplot(tzav(), space = distpreci(), col = as.factor(alveari()$idGruppo),
             main = "Infestazione\n(raggruppati e colorati per gruppo\ne raggruppati per banchetta)", ylab = "acari / 100 api",
             names.arg = alveari()$idAlveare, cex.names = 0.9, las = 2); abline(h=5, col = "red", lty=2)
     # 2DO: aggiungere boxplot per gruppo, con analisi e density per banchetta
@@ -262,6 +285,7 @@ server <- function(input, output) {
   })
   # Eliminazione manuale di alveari
   output$manualExclude  <- renderUI({
+    req(alveari())
     selectInput("manualExcluded", "Escludi manualmente:",
                 choices = alveari()$idAlveare, multiple = T)
   })
@@ -269,28 +293,34 @@ server <- function(input, output) {
   ## Subtab Outliers
   # outliers identificati
   output$idOutliers <- renderText({
+    req(alveari(), isOutlier())
     paste(alveari()$idAlveare[isOutlier()], sep = ", ")
     #alveari()[which(alveari()$zav %in% boxplot.stats(alveari()$zav)$out), 1]
   })
   # proporzione (%) degli outliers
   output$propOutliers <- renderText({
+    req(isOutlier())
     paste0(format(100*sum(isOutlier())/length(isOutlier()),digits = 2), "%")
   })
   # media degli outliers
   output$medOutliers <- renderText({
+    req(tzav(), isOutlier())
     paste0(format(mean(tzav()[isOutlier()]),digits = 2), "%")
   })
   # media con gli outliers
   output$medconOutliers <- renderText({
+    req(tzav())
     paste0(format(mean(tzav()),digits = 2), "%")
   })
   # media senza gli outliers
   output$medsenOutliers <- renderText({
+    req(tzav(), isOutlier())
     paste0(format(mean(tzav()[!isOutlier()]),digits = 2), "%")
   })
   # boxplot outliers tipo 
   # https://www.r-bloggers.com/identify-describe-plot-and-remove-the-outliers-from-the-dataset/
   output$bplotsOutliers <- renderPlot({
+    req(tzav(), isOutlier())
     par(mfrow=c(2, 2), oma=c(0,0,3,0))
     boxplot(tzav(), main="Con outliers"); abline(h=5, col = "red", lty=2)
     hist(tzav(), main="Con outliers", xlab=NA, ylab=NA); abline(v=5, col = "red", lty=2)
@@ -301,12 +331,14 @@ server <- function(input, output) {
   ## SUBTAB Soglia minima
   # barplot selezione
   output$selBar <- renderPlot({
+    req(alveari())
     distprec <- 0.15
     for(i in 2:dim(alveari())[1]){
       distprec[i] <- (alveari()$idBanchetta[i-1] != alveari()$idBanchetta[i]) + 
         (alveari()$idGruppo[i-1] != alveari()$idGruppo[i])*2 + 0.15
     }
-    barplot(tzavAn(), space = distprec, col = "khaki1", 
+    req(tzavAn(), tzav(), input$sogliaMin)
+    barplot(tzavAn(), space = distprec, col = "khaki1",
           main = "Infestazione\n(alveari selezionati, raggruppati per banchetta)", 
           ylab = "acari / 100 api",           names.arg = alveari()$idAlveare, cex.names = 0.9, 
           las = 2, ylim = c(0, max(tzav()))); abline(h=5, col = "red", lty=2); abline(h = input$sogliaMin)
@@ -315,6 +347,7 @@ server <- function(input, output) {
   
     #conteggio alveari post selezione
     output$nAlvPo <- renderText({
+    req(alveariPo())
     paste(dim(alveariPo())[1])
     #print(input$delOutliers)
   })
@@ -323,6 +356,7 @@ server <- function(input, output) {
     #2do: per evitare tutti gli errori iniziali si potrebbe forzare il calcolo nella pagina precedente richiedendo per esempio
     #un dato dipendente dagli altri
     output$inputTesi <- renderUI({
+      req(alveariPo())
       numericInput("tesi", "Numero di tesi", 2, min = 2, max = dim(alveariPo())[1])
     })
     
@@ -336,6 +370,7 @@ server <- function(input, output) {
       input$calcButton
       input$seme
       }, {
+      req(alveariPo(), input$tesi)
       t(unique(sapply(1 : input$iterazioni, function(b){
         set.seed(input$seme + b)
         ranran <- rank(alveariPo()$zav, ties.method="random", na.last=F) #rango casuale
@@ -356,6 +391,7 @@ server <- function(input, output) {
       if (input$calcButton == 0) {
         return(NULL)
       }else{
+      req(combinazioni())
       paste0("Numero di ipotesi uniche di gruppi: ", dim(combinazioni())[1])
       #paste0(combinazioni()[, 1])
       }
@@ -367,7 +403,10 @@ server <- function(input, output) {
       if (input$calcButton == 0) {
         return(NULL)
       }else{
-      alveariPo()$idBanchetta[-1] == alveariPo()$idBanchetta[-length(alveariPo()$idBanchetta)]}}) 
+        req(alveariPo())
+        alveariPo()$idBanchetta[-1] == alveariPo()$idBanchetta[-length(alveariPo()$idBanchetta)]
+      }
+    })
     
     deriva <- function(pos, tesi){
       sum(pos & (tesi[-1] != tesi[-length(tesi)]))
@@ -377,6 +416,8 @@ server <- function(input, output) {
       if (input$calcButton == 0) {
         return(NULL)
       }else{
+      req(combinazioni(), pos())
+      validate(need(sum(pos()) > 0, "Impossibile calcolare la deriva: nessuna banchetta consecutiva disponibile."))
       apply(combinazioni(), 1, function(a){deriva(pos(), a)}) / sum(pos())
       }
       })
@@ -384,23 +425,31 @@ server <- function(input, output) {
       if (input$calcButton == 0) {
         return(NULL)
       }else{
-      head(combinazioni()[order(derIndex()), ], n = 25)
-        }
-      })  #traspone e prende i primi 25
+        req(combinazioni(), derIndex())
+        head(combinazioni()[order(derIndex()), ], n = 25)
+      }
+    })  #traspone e prende i primi 25
     
     output$best25Choice <- renderUI({
       if (input$calcButton == 0) {
         return(NULL)
       }else{
-      selectInput("bestChosen", "Altre combinazioni con stessa distribuzione (deriva crescente)", choices = (1 : (dim(best25())[1])), 1)
+        req(best25())
+        selectInput(
+          "bestChosen",
+          "Altre combinazioni con stessa distribuzione (deriva crescente)",
+          choices = (1:(dim(best25())[1])),
+          1
+        )
       }
         })
-    
+
     output$TEMP <- #renderText({input$bestChosen})
       renderText({
         if (input$calcButton == 0) {
           return(NULL)
         }else{
+        req(best25())
         paste0(best25()[as.integer(input$bestChosen),])
         }
         })
@@ -409,6 +458,7 @@ server <- function(input, output) {
       if (input$calcButton == 0) {
         return(NULL)
       }else{
+      req(alveariAn(), alveariPo(), best25(), tzav(), tzavAn())
       alveariPo2 <- alveariPo()
       alveariPo2$grTesi <- best25()[as.integer(input$bestChosen),]
       temp <- merge(alveariAn(), alveariPo2[, c(1, 5)], by = "idAlveare", all.x = T, sort = F)
@@ -425,9 +475,10 @@ server <- function(input, output) {
         return(NULL)
       }else{
       #par(mfrow=c(2,1))
-      barplot(tzavAn(), space = distpreci(), col = 1 + as.integer(alveariAnDEF()$grTesi), 
-              main = "Infestazione\n(colorati per tesi\ne raggruppati per banchetta)", 
-              ylab = "acari / 100 api",           names.arg = alveariAnDEF()$idAlveare, cex.names = 0.9, 
+      req(tzavAn(), distpreci(), alveariAnDEF(), tzav())
+      barplot(tzavAn(), space = distpreci(), col = 1 + as.integer(alveariAnDEF()$grTesi),
+              main = "Infestazione\n(colorati per tesi\ne raggruppati per banchetta)",
+              ylab = "acari / 100 api",           names.arg = alveariAnDEF()$idAlveare, cex.names = 0.9,
               las = 2, ylim = c(0, max(tzav()))); abline(h=5, col = "red", lty=2)
       
       #boxplot(tzavAn()~alveariAnDEF()$grTesi, col = 1 + as.integer(levels(as.factor(alveariAnDEF()$grTesi))), 
@@ -446,6 +497,7 @@ server <- function(input, output) {
       if (input$calcButton == 0) {
         return(NULL)
       }else{
+      req(alveariAnDEF())
       #boxplot(alveariAnDEF()$zav~alveariAnDEF()$grTesi)
       
       # boxplot(tzavAn()~alveariAnDEF()$grTesi, col = 1 + as.integer(levels(as.factor(alveariAnDEF()$grTesi))), 
@@ -461,6 +513,7 @@ server <- function(input, output) {
       if (input$calcButton == 0) {
         return(NULL)
       }else{
+      req(derIndex(), input$bestChosen)
       paste0(derIndex()[order(derIndex())][as.integer(input$bestChosen)])
       }
       })
@@ -470,6 +523,7 @@ server <- function(input, output) {
       if (input$calcButton == 0) {
         return(NULL)
       }else{
+      req(derIndex())
       paste0("Indice di deriva minimo: ", min(derIndex()))
       }
       })
@@ -484,6 +538,10 @@ server <- function(input, output) {
       if (input$calcButton == 0) {
         return(NULL)
       }else{
+      req(alveariAnDEF(), combinazioni(), input$bestChosen)
+      validate(need(sum(!is.na(alveariAnDEF()$tzavAn)) >= 2, "Dati insufficienti per il test sui quantili."))
+      validate(need(length(unique(na.omit(alveariAnDEF()$tzavAn))) > 1,
+                    "Valori di infestazione insufficienti per creare classi distinte."))
       (q<-quantile(as.numeric(alveariAnDEF()$tzavAn) , seq(0, 1, .2), na.rm = T))
       bin <- cut(alveariAnDEF()$tzavAn, breaks=q, include.lowest=T)
       tab <- with(alveariAnDEF(), table(bin, as.factor(combinazioni()[as.integer(input$bestChosen),])))
@@ -495,6 +553,7 @@ server <- function(input, output) {
       if (input$calcButton == 0) {
         return(NULL)
       }else{
+        req(tabBinDef())
         paste0("Test del Chi quadrato di Pearson sui dati raggruppati in 5 classi. \n",
                "Chi quadrato = ", format(tabBinDef()$statistic, digits = 4), " p = ",
                format(tabBinDef()$p.value, digits = 3)
@@ -515,6 +574,7 @@ server <- function(input, output) {
       if (input$calcButton == 0) {
         return(NULL)
       }else{
+      req(alveariAnDEF())
       alveariAnDEF()[,1:5]
       }
     })
@@ -528,6 +588,7 @@ server <- function(input, output) {
         paste("gruppi_auto.xls", sep = "")
       },
       content = function(file) {
+        req(alveariAnDEF())
         WriteXLS(alveariAnDEF()[,1:5], file, row.names = FALSE)}
 
       
@@ -539,19 +600,24 @@ server <- function(input, output) {
       if (input$calcButton == 0) {
         return(NULL)
       }else{
-      paste0("Download della soluzione attuale (gruppi creati nella colonna grTesi)")
-      downloadButton("downloadData", "Download")
+      req(alveariAnDEF())
+      tagList(
+        p("Download della soluzione attuale (gruppi creati nella colonna grTesi)"),
+        downloadButton("downloadData", "Download")
+      )
       }
     })
     
 
 # Manuale -----------------------------------------------------------------
 
-alveariPoM <- reactive({ # farlo aggiornare solo su pressione di un bottone???
-  alveariAnDEF()[!is.na(alveariAnDEF()$grTesi), ]
-})
+  alveariPoM <- reactive({ # farlo aggiornare solo su pressione di un bottone???
+    req(alveariAnDEF())
+    alveariAnDEF()[!is.na(alveariAnDEF()$grTesi), ]
+  })
 
-output$radioGrid <- renderUI({
+  output$radioGrid <- renderUI({
+    req(alveariPoM())
 # a=1
 #   radioButtons(alveariPoM()$idAlveare[a], alveariPoM()$idAlveare[a], 1 : as.integer(input$tesi), selected = alveariPoM()$grTesi[a], inline = T)
   radioOutputList <- tagList()
