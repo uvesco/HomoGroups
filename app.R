@@ -515,7 +515,7 @@ ui <- shinyUI(navbarPage("Formazione dei gruppi",
                                            
                                            h4("Informazioni di contatto"),
                                            p("Per segnalare problemi, suggerire miglioramenti o richiedere assistenza sull'utilizzo dell'applicazione, 
-                                             visitare il [repository GitHub del progetto](https://github.com/uvesco/HomoGroups)."),
+                                             visitare il ", tags$a(href="https://github.com/uvesco/HomoGroups", "repository GitHub del progetto", target="_blank"), "."),
                                            
                                            br(),
                                            p(em("Versione dell'applicazione: 1.0 | Ultima revisione della guida: 2025")),
